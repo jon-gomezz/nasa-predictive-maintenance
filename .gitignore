@@ -1,0 +1,25 @@
+# Python cache e ignotos
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Entornos virtuales
+venv/
+.venv/
+ENV/
+env/
+
+# Variables de entorno
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+
+# Logs e ignotos de SO
+*.log
+.DS_Store
+Thumbs.db
