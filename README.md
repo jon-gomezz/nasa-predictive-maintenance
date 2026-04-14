@@ -65,6 +65,14 @@ Tras validar la solidez económica y predictiva del modelo, procedimos a resolve
 Para alcanzar verdaderamente el estatus de un entorno operacional complejo, escalamos la arquitectura matemática al infame dataset `FD002`. Aquí, los aviones cambian caóticamente de altitud y número Mach durante el vuelo, creando un ruido masivo capaz de quebrar los modelos predictivos estándar (que confunden una caída de presión por altura atmosférica con una falla de motor).
 
 *   **Identificación de Regímenes Ocultos (K-Means Clustering):** Diseñamos `ConditionNormalizer` (`src/features.py`). Este módulo entrena un modelo No-Supervisado de Clustering para auditar los `op_settings` en tiempo real y deducir en cuál de los 6 regímenes climáticos está operando el aparato en cada segundo.
+
+<br>
+<p align="center">
+  <img src="assets/kmeans_clusters.png" width="550">
+  <br>
+  <em>Clustering K-Means 3D: Aislamiento algorítmico No-Supervisado de los 6 regímenes climáticos (FD002)</em>
+</p>
+
 *   **Aislamiento y Normalización Independiente:** En lugar de aplicar un escalado global que emborrone las señales, el sistema aísla porciones de vuelo e inyecta un `StandardScaler` totalmente dinámico y exclusivo para cada clúster/altitud. Así, "planchamos" el efecto del clima para sacar a relucir la pureza magnética del desgaste mecánico subyacente.
 *   **Hyperparameter Tuning con Optuna:** Para navegar el aumento dramático del ruido incluso tras la normalización, lanzamos algoritmos de búsqueda bayesiana de *Optuna* para escanear cientos de arquitecturas de ramas del XGBoost y hallar la estabilidad predictiva máxima de forma empírica.
     *   *Desempeño Final en el Blind Test Ciego Multi-régimen (`FD002` con 259 aviones):*
@@ -75,19 +83,11 @@ Para alcanzar verdaderamente el estatus de un entorno operacional complejo, esca
 
     *   *Resolución Operativa (Recall 97%):* Este resultado destrozó por completo las expectativas de la industria. Atapar 59 averías letales de 61 bajo perturbaciones climáticas severas, levantando apenas 9 falsas alarmas operativas en casi 200 aviones sanos, demuestra un nivel de madurez absoluto del Pipeline Híbrido, probando que destilar la señal con Unsupervised Learning antes de predecir es una práctica innegociable en la Ingeniería Moderna.
 
-<br>
-<p align="center">
-  <img src="assets/kmeans_clusters.png" width="700">
-  <br>
-  <em>Clustering K-Means 3D: Aislamiento algorítmico No-Supervisado de los 6 regímenes climáticos (FD002)</em>
-</p>
-
 <p align="center">
   <img src="assets/confusion_matrix_fd002.png" width="550">
   <br>
   <em>Matriz de Confusión en la Fase de Validación Ciega: Intercepción total de Motores críticos preservando hardware sano</em>
 </p>
-
 
 ### ✅ Fase 5: Arquitectura MLOps, Empaquetado y Producción
 El último paso indispensable para que esto pase de ser "código de un Data Scientist" a un "activo de software de una empresa" es la Productivización (MLOps). El modelo estático pasó a la RAM de un servidor asíncrono para consumir telemetría y servir decisiones críticas a gran velocidad.
