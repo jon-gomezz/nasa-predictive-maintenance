@@ -51,6 +51,7 @@ Tras validar la solidez económica y predictiva del modelo, procedimos a resolve
   <br>
   <em>Valores SHAP globales: Transparencia algorítmica probando cómo el desgaste de cada sensor acelera la probabilidad de rotura</em>
 </p>
+
 *   **Despliegue Experimental en Fuego Real (Blind Test set):** Para emular un despliegue total en producción, el proyecto evalúa su eficacia definitiva consumiendo el sub-set de evaluación ciego suministrado por la NASA (`test_FD001.txt`). Este contiene telemetría truncada bruscamente de 100 motores distintos, obligando al modelo a predecir si el desastre actuará en sus próximos 30 vuelos, basándose únicamente en el *último ciclo capturado*.
     *   *Desempeño final frente al RUL verdadero:*
         | Real \ Predicho | SANO (0) | PELIGRO (1) |
@@ -86,6 +87,8 @@ Para alcanzar verdaderamente el estatus de un entorno operacional complejo, esca
   <br>
   <em>Matriz de Confusión en la Fase de Validación Ciega: Intercepción total de Motores críticos preservando hardware sano</em>
 </p>
+
+
 ### ✅ Fase 5: Arquitectura MLOps, Empaquetado y Producción
 El último paso indispensable para que esto pase de ser "código de un Data Scientist" a un "activo de software de una empresa" es la Productivización (MLOps). El modelo estático pasó a la RAM de un servidor asíncrono para consumir telemetría y servir decisiones críticas a gran velocidad.
 
