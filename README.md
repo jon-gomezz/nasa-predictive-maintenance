@@ -147,19 +147,6 @@ docker run -p 8000:8000 -p 8501:8501 nasa-predictive-mlops
 
 ---
 
-## 🛡️ Ensayo de Defensa Técnica (Rationale de Decisiones)
+## 🛡️ Decisiones de Arquitectura y Trade-Offs
 
-Este proyecto ha sido diseñado anticipando un escrutinio estricto en entrevistas técnicas y defensas de arquitectura. A continuación, se detalla el razonamiento detrás de nuestros *trade-offs* más agresivos:
-
-### 1. ¿Por qué priorizar radicalmente el Recall sobre la Precision?
-*(Ataque: "Tu modelo genera Falsos Positivos, estás enviando mecánicos a revisar motores sanos y costando dinero a la empresa").*
-*   **Defensa:** En entornos de mantenimiento crítico aeroespacial o industrial, la matriz de costes es altamente asimétrica. Un Falso Positivo cuesta ~\$2,000 (horas de inspección y pérdida menor de operatividad). Un Falso Negativo (un motor colapsando en pleno vuelo porque el modelo dijo que estaba "Sano") cuesta decenas de millones de dólares por pérdida de hardware subyacente, compensaciones legales y daño irreparable a la reputación de la marca. Entrenamos a XGBoost con `scale_pos_weight` buscando atrapar >90% de los fallos, asumiendo conscientemente el ligero repunte de Falsas Alarmas; porque revisar un motor extra siempre será más barato que recoger pedazos de metal en la pista.
-
-### 2. ¿Por qué usar GroupShuffleSplit (`unit_id`) y no un TimeSeriesSplit aleatorio clásico?
-*(Ataque: "Deberías haber usado K-Fold o un split estratificado al 80/20 puro sobre todo el dataframe").*
-*   **Defensa:** Aplicar un *train_test_split* aleatorio puro en filas temporales destruye la validación en el mundo IoT. Si un motor `nº 44` tiene 200 filas de vuelo y caen aleatoriamente 180 al dataset de Entrenamiento y 20 al de Validación, el modelo "memorizará" la firma termodinámica específica de ese motor `nº 44`. Cuando intentemos validarlo en esas 20 filas ocultas, el métrico será altísimo por culpa del *Data Leakage*. Al usar un split agrupado por `unit_id`, forzamos a que si el motor `nº 50` es asignado a Validación, XGBoost **jamás** haya visto ni uno solo de sus vuelos durante el entrenamiento. Esto nos permite asegurar métricas de inferencia genuinas equivalentes a hardware completamente nuevo.
-
-### 3. ¿Por qué utilizar K-Means Clustering forzado antes de las variables temporales en FD002?
-*(Ataque: "En FD002 podrías haberle dado los datos crudos a XGBoost, es un modelo basado en árboles, internamente habría encontrado las divisiones por régimen climático si le das los 'op_settings'").*
-*   **Defensa:** Aunque XGBoost corta espacios horizontal y verticalmente maravillosamente bien, en FD002 la degradación del motor (escala pequeña) queda total y absolutamente ahogada por la altitud y los números Mach (escala masiva). Un cambio de *régimen* interrumpe bruscamente la serie temporal. Si unimos esto con un *Rolling Window* ingenuo, acabaríamos sacando la "media móvil" entre la Tº a Nivel del Mar y la Tº a 30.000 pies de altura juntos, metiendo un ruido infernal en la serie temporal.
-*   Al anticiparnos inyectando *K-Means* como Inteligencia No-Supervisada en las variables atmosféricas, particionamos el entorno de vuelo en 6 "burbujas" aisladas. Forzando a cada burbuja a ejecutarse bajo su propio *StandardScaler*, eliminamos matemáticamente la huella física de la atmósfera. Solo entonces, cuando las métricas eran comparables entre sí en "condiciones neutras", calculamos las medias móviles para XGBoost. Esto es lo que disparó el *Recall* en el test ciego multirégimen al insólito techo de 97%.
+Si quieres conocer a nivel técnico avanzado las decisiones matemáticas y de ingeniería detrás de este pipeline (gestión del desbalanceo, K-Means como proxy climático, y prevención de Data Leakage temporal), consulta nuestro documento de [**Architecture Decision Record (ADR)**](ARCHITECTURE_DECISIONS.md).
