@@ -1,6 +1,11 @@
-# Predictive Maintenance: Turbofan Engine Degradation (NASA C-MAPSS)
 
-Este proyecto desarrolla un sistema de **Machine Learning para Mantenimiento Predictivo** utilizando el framework C-MAPSS de la NASA (dataset FD001). El objetivo principal es predecir si un motor comercial de tipo Turbofán fallará en el corto plazo (próximos 30 ciclos), permitiendo programar mantenimientos antes de una falla catastrófica (Run-to-Failure).
+<p align="center">
+  <img src="assets/streamlit_dashboard.png" width="900">
+  <br>
+  <em>Arquitectura MLOps en Producción: Panel de Alerta Asíncrono (FastAPI + Streamlit)</em>
+</p>
+
+Este proyecto desarrolla un sistema de **Machine Learning para Mantenimiento Predictivo** utilizando el framework C-MAPSS de la NASA. El objetivo principal es predecir si un motor comercial de tipo Turbofán fallará en el corto plazo, permitiendo programar mantenimientos en tierra antes de una falla catastrófica en pleno vuelo (Run-to-Failure).
 
 ---
 
@@ -18,8 +23,6 @@ Este proyecto desarrolla un sistema de **Machine Learning para Mantenimiento Pre
 
     *   *Análisis Inicial:* Logramos una base muy fuerte con un Accuracy del 96%. Sin embargo, en mantenimiento industrial, el *Accuracy* es engañoso debido al desbalanceo de clases. El **Recall** (sensibilidad para cazar el fallo) fue del 88%. El modelo era excesivamente conservador y dejaba pasar 77 motores en estado crítico sin alertar de las anomalías.
 
-> 🖼️ **[NOTA PARA GITHUB]**: *Insertar aquí captura de pantalla o gráfico de barras de colores mostrando esta primera iteración de la Matriz de Confusión generada por `src/train.py`.*
-
 
 ### ✅ Fase 2: Feature Engineering Temporal y *Cost-Sensitive Learning*
 El problema principal detectado en la Fase 1 es que los fallos mecánicos no ocurren en un vacío estadístico; dependen fuertemente de la inercia temporal de las vibraciones asociadas al motor.
@@ -36,16 +39,18 @@ El problema principal detectado en la Fase 1 es que los fallos mecánicos no ocu
         1. **Retorno de Inversión Tecnológica:** El Recall general subió casi a un 90%. Al empujar esta métrica, redujimos los *Falsos Negativos* (fallos críticos obviados) de 77 a 68. En una flota de turbofanes comerciales, cazar 9 roturas catastróficas adicionales salva millones de dólares directos en infraestructura y mitiga crisis de relaciones públicas fatales.
         2. **Coste Operativo:** Obligar a XGBoost a ser tan agresivo generó un repunte colateral de los *Falsos Positivos* (de 87 subieron a 108 falsas alarmas). A nivel logístico, desplegar a inspectores a pie de pista en repetidas ocasiones para que den el "OK" al motor cuesta dinero en operarios y horas-taller de mantenimiento, sin embargo, dicha cifra supone menos del 0.1% de lo que supondría un solo siniestro en pista por culpa de un fallo encubierto.
 
-> 🖼️ **[NOTA PARA GITHUB]**: *Insertar aquí el mapa térmico de la Matriz de Confusión final, o bien una captura visual del proceso de ejecución de entrenamiento y comparación lado a lado con el baseline.*
-
 
 ### ✅ Fase 3: Explicabilidad (XAI) y Simulador de Producción (Blind Test)
 Tras validar la solidez económica y predictiva del modelo, procedimos a resolver "la maldición de las Cajas Negras" del Machine Learning moderno, sumamente perseguida por la Unión Europea bajo la actual *AI Act*.
 
 *   **Inteligencia Artificial Explicable (SHAP Values):** Para generar confianza con los jefes de pista, se implementó un flujo basado en `SHAP (SHapley Additive exPlanations)`. SHAP de-construye la función de decisión del árbol globalmente, indicando no solo si el motor va a fallar, sino cuáles han sido exactamente las desviaciones termodinámicas concretas del sensor (Tº, presión, flujo capilar) que provocaron el disparo del trigger en tiempo real. 
 
-> 🖼️ **[NOTA PARA GITHUB]**: *Insertar aquí una imagen del 'SHAP Summary Plot' (gráfico de abejas / dot plot coloreado) y un 'Waterfall Plot' donde se desglose explícitamente cómo una lectura anormal del principal sensor hizo saltar la decisión.*
-
+<br>
+<p align="center">
+  <img src="assets/shap_beeswarm.png" width="800">
+  <br>
+  <em>Valores SHAP globales: Transparencia algorítmica probando cómo el desgaste de cada sensor acelera la probabilidad de rotura</em>
+</p>
 *   **Despliegue Experimental en Fuego Real (Blind Test set):** Para emular un despliegue total en producción, el proyecto evalúa su eficacia definitiva consumiendo el sub-set de evaluación ciego suministrado por la NASA (`test_FD001.txt`). Este contiene telemetría truncada bruscamente de 100 motores distintos, obligando al modelo a predecir si el desastre actuará en sus próximos 30 vuelos, basándose únicamente en el *último ciclo capturado*.
     *   *Desempeño final frente al RUL verdadero:*
         | Real \ Predicho | SANO (0) | PELIGRO (1) |
@@ -69,8 +74,18 @@ Para alcanzar verdaderamente el estatus de un entorno operacional complejo, esca
 
     *   *Resolución Operativa (Recall 97%):* Este resultado destrozó por completo las expectativas de la industria. Atapar 59 averías letales de 61 bajo perturbaciones climáticas severas, levantando apenas 9 falsas alarmas operativas en casi 200 aviones sanos, demuestra un nivel de madurez absoluto del Pipeline Híbrido, probando que destilar la señal con Unsupervised Learning antes de predecir es una práctica innegociable en la Ingeniería Moderna.
 
-> 🖼️ **[NOTA PARA GITHUB]**: *Insertar un Diagrama de Dispersión donde se agrupe en distintos colores los 6 clústeres de régimen de vuelo hallados por el K-Means sobre las variables operativas, demostrando el control visual de los datos.*
+<br>
+<p align="center">
+  <img src="assets/kmeans_clusters.png" width="700">
+  <br>
+  <em>Clustering K-Means 3D: Aislamiento algorítmico No-Supervisado de los 6 regímenes climáticos (FD002)</em>
+</p>
 
+<p align="center">
+  <img src="assets/confusion_matrix_fd002.png" width="550">
+  <br>
+  <em>Matriz de Confusión en la Fase de Validación Ciega: Intercepción total de Motores críticos preservando hardware sano</em>
+</p>
 ### ✅ Fase 5: Arquitectura MLOps, Empaquetado y Producción
 El último paso indispensable para que esto pase de ser "código de un Data Scientist" a un "activo de software de una empresa" es la Productivización (MLOps). El modelo estático pasó a la RAM de un servidor asíncrono para consumir telemetría y servir decisiones críticas a gran velocidad.
 
