@@ -22,3 +22,21 @@ Al usar un split agrupado estrictamente por `unit_id`, garantizamos que si el mo
 **Defensa:** Es cierto que XGBoost divide hiperplanos excepcionalmente, pero en FD002 la degradación sutil del motor queda sepultada por cambios masivos en la altitud y los números Mach. Si leemos esto ingenuamente con un *Rolling Window* estándar, sacaremos medias cruzadas entre la Temperatura a Nivel del Mar y a 30.000 pies de altura, inyectando un ruido aniquilador en la serie de tiempo de desgaste.
 
 Al anticiparnos e inyectar *K-Means* como Inteligencia No-Supervisada, particionamos dictatorialmente la atmósfera en 6 "burbujas" operacionales (*Flight Regimes*). Forzando a cada burbuja a ejecutarse bajo un sub-sistema `StandardScaler` independiente, neutralizamos por completo el impacto del clima antes de que ensucie la serie. Sobre esa señal químicamente pura, ahora sí calculamos medias móviles. Ese es el verdadero responsable de que el *Recall* en el test multirégimen alcanzase el 97%.
+
+## 4. ¿Por qué enfocar el target como Clasificación Binaria en vez de Regresión Numérica pura (RUL)?
+*(Ataque potencial: "El target original de la NASA es encontrar el Remaining Useful Life (RUL) exacto, ¿por qué lo binarizaste a 'Fallo inminente'?").*
+
+**Defensa:** Desde el punto de vista puramente algorítmico, intentar predecir que a un turbofán le quedan "123.4 vuelos" frente a "125 vuelos" en su ecuador de vida es ruido matemático sin valor de negocio. El desgaste físico de un motor no es lineal al principio de su ciclo. 
+Lo que un departamento de Operaciones MRO (Maintenance, Repair, Overhaul) necesita es accionar un Protocolo Operativo. Reenfocar la señal cruzando un umbral binario de urgencia técnica (A los 30 ciclos) alinea el algoritmo con la realidad física. Resulta estadísticamente más robusto y logísticamente más útil decirle a los ingenieros "Luz Roja: Peligro de colapso crítico inmediato", en lugar de devolver predicciones numéricas con alta varianza inútil en las primeras etapas sanas del aparato.
+
+## 5. ¿Por qué exponer el modelo con FastAPI Asíncrono en lugar de un proceso Batch Nocturno (Cron/Airflow)?
+*(Ataque potencial: "Para rutinas de mantenimiento pesadas suele bastar con correr los modelos masivamente una vez a la noche. ¿Por qué crear una REST API de microservicio?").*
+
+**Defensa:** El despliegue Batch clásico sirve para sustituir correas dentadas de coche periódicamente, pero resulta inaceptable si una turbina de 4 millones de dólares manifiesta una vibración anómala en pleno aterrizaje y debemos dictaminar la viabilidad de su despegue a la mañana siguiente.
+Levantar y "sembrar" el pipeline completo Híbrido (K-Means + XGBoost) dentro de la memoria RAM de un contenedor asíncrono con FastAPI nos traslada al paradigma "Event-Driven Maintenance" (Mantenimiento reactivo de ultra-baja latencia). La ráfaga de telemetría de vuelo puede enviarse directamente contra el Endpoint tras tocar tierra e interceptar el desastre mecácnico en 40 milisegundos.
+
+## 6. ¿Por qué usar Teoría de Juegos (Calculo SHAP) en vez del "Feature Importance" predeterminado del XGboost?
+*(Ataque potencial: "Calcular valores SHAP requiere peso extra. ¿Por qué no sacaste la gráfica nativa de Importance del árbol?").*
+
+**Defensa:** El "Feature Importance" nativo (*Gini / Weight*) promedia la capacidad destructiva del árbol pero es mudo: no indica dirección causal (es decir, no te dice si la presión alta rompe el motor o lo cura) y sobre todo, explica el bosque y no el árbol. 
+Nuestros usuarios finales asumen grandes responsabilidades de riesgo. Cuando al ingeniero le salta nuestra Alarma Roja en Streamlit, recordarle que "El Sensor_14 suele ser muy importante para tu flota" no le sirve. Él debe saber qué fue mal *hoy* y en *este avión* para desmontar sus piezas. SHAP (*SHapley Additive exPlanations*) nos provee Explicabilidad Local, destrozando la caja negra del modelo para mostrarle qué sensor térmico concreto acorraló al motor hacia el desastre aquel jueves por la tarde. Esto, bajo estricta ley de auditoría internacional (ej. Europea), blinda legalmente la adopción de Big Data.
